@@ -24,3 +24,25 @@ The following input variables can be passed to the module:
 - `roles`: List of roles to grant the privilege to; by default, an empty list
 - `shares`: List of shares to grant the privilege to; by default, an empty list
 
+The `snowflake` provider must also be passed to the module; the role associated
+with the provider must have `SECURITYADMIN` granted to it.
+
+## Example
+
+Grant `SELECT` privileges on all tables in the SEGMENT.SALESFORCE schema:
+
+```hcl
+module "grant_on_all" {
+  source = "./grant_on_all"
+  object_types = ["TABLE"]
+  database_name = "SEGMENT"
+  schema_name = "SALESFORCE"
+  privilege = "SELECT"
+  roles = [snowflake_role.salesforce.name]
+
+  providers = {
+    snowflake = snowflake.securityadmin
+  }
+}
+```
+
