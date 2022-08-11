@@ -25,7 +25,7 @@ data "snowflake_stages" "this" {
 locals {
   object_types = [for object_type in var.object_types : lower(object_type)]
   tables = toset([
-    for table in data.snowflake_tables.this.tables :
+    for table in try(data.snowflake_tables.this.tables, {"tables": []}) :
     table.name
     if contains(local.object_types, "table")
   ])
