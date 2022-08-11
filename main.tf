@@ -5,8 +5,6 @@ terraform {
       version = "0.40.0"
     }
   }
-
-#   required_version = ">= 0.14.9"
 }
 
 data "snowflake_tables" "this" {
