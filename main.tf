@@ -1,12 +1,10 @@
 terraform {
   required_providers {
     snowflake = {
-      source  = "chanzuckerberg/snowflake"
-      version = "~> 0.25.19"
+      source = "Snowflake-Labs/snowflake"
+      version = "0.36.0"
     }
   }
-
-  required_version = ">= 0.14.9"
 }
 
 data "snowflake_tables" "this" {
@@ -26,21 +24,18 @@ data "snowflake_stages" "this" {
 
 locals {
   object_types = [for object_type in var.object_types : lower(object_type)]
-  tables = toset([
-    for table in data.snowflake_tables.this.tables :
-    table.name
-    if contains(local.object_types, "table")
-  ])
-  views = toset([
+  tables = contains(local.object_types, "table") && data.snowflake_tables.this.tables != null ? toset([
+    for view in data.snowflake_tables.this.tables :
+    view.name
+  ]) : toset([])
+  views = contains(local.object_types, "view") && data.snowflake_views.this.views != null ? toset([
     for view in data.snowflake_views.this.views :
     view.name
-    if contains(local.object_types, "table")
-  ])
-  stages = toset([
+  ]) : toset([])
+  stages = contains(local.object_types, "stage") && data.snowflake_stages.this.stages != null ? toset([
     for stage in data.snowflake_stages.this.stages :
     stage.name
-    if contains(local.object_types, "stage")
-  ])
+  ]) : toset([])
 }
 
 resource "snowflake_table_grant" "this" {
@@ -52,7 +47,6 @@ resource "snowflake_table_grant" "this" {
   privilege = var.privilege
 
   roles  = var.roles
-  shares = var.shares
 
   depends_on = [
     data.snowflake_tables.this
@@ -68,7 +62,6 @@ resource "snowflake_view_grant" "this" {
   privilege = var.privilege
 
   roles  = var.roles
-  shares = var.shares
 
   depends_on = [
     data.snowflake_views.this
@@ -84,7 +77,6 @@ resource "snowflake_stage_grant" "this" {
   privilege = var.privilege
 
   roles  = var.roles
-  shares = var.shares
 
   depends_on = [
     data.snowflake_stages.this
