@@ -82,7 +82,6 @@ resource "snowflake_stage_grant" "this" {
   privilege = var.privilege
 
   roles  = var.roles
-  shares = var.shares
 
   depends_on = [
     data.snowflake_stages.this
