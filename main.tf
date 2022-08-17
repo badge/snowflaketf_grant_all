@@ -1,12 +1,10 @@
 terraform {
   required_providers {
     snowflake = {
-      source  = "chanzuckerberg/snowflake"
-      version = "~> 0.25.19"
+      source  = "snowflake-labs/snowflake"
+      version = "0.40.0"
     }
   }
-
-  required_version = ">= 0.14.9"
 }
 
 data "snowflake_tables" "this" {
@@ -27,17 +25,17 @@ data "snowflake_stages" "this" {
 locals {
   object_types = [for object_type in var.object_types : lower(object_type)]
   tables = toset([
-    for table in data.snowflake_tables.this.tables :
+    for table in coalesce(data.snowflake_tables.this.tables, []) :
     table.name
     if contains(local.object_types, "table")
   ])
   views = toset([
-    for view in data.snowflake_views.this.views :
+    for view in coalesce(data.snowflake_views.this.views, []) :
     view.name
     if contains(local.object_types, "table")
   ])
   stages = toset([
-    for stage in data.snowflake_stages.this.stages :
+    for stage in coalesce(data.snowflake_stages.this.stages, []) :
     stage.name
     if contains(local.object_types, "stage")
   ])
@@ -84,7 +82,6 @@ resource "snowflake_stage_grant" "this" {
   privilege = var.privilege
 
   roles  = var.roles
-  shares = var.shares
 
   depends_on = [
     data.snowflake_stages.this
