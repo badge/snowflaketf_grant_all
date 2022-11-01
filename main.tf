@@ -32,7 +32,7 @@ locals {
   views = toset([
     for view in coalesce(data.snowflake_views.this.views, []) :
     view.name
-    if contains(local.object_types, "table")
+    if contains(local.object_types, "view")
   ])
   stages = toset([
     for stage in coalesce(data.snowflake_stages.this.stages, []) :
